@@ -82,40 +82,36 @@ func setConfig() *ssh.ClientConfig {
 	return cfg
 }
 
-func NewSSHSession() *ssh.Session {
+func NewSSHClient() *ssh.Client {
 	cfg := setConfig()
 
 	host := viper.GetString("host")
 	addr := fmt.Sprintf("%s:22", host)
 	client, err := ssh.Dial("tcp", addr, cfg)
 	if err != nil {
-		log.Fatal(err)
-	}
-	session, err := client.NewSession()
-	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error connecting server , err : %q \n", err)
 	}
 
-	return session
+	return client
 
 }
 
-func RunCmd(cmd string, session *ssh.Session) error {
+func RunCmd(cmd string, client *ssh.Client) error {
+	session, _ := client.NewSession()
+	session.Stdout = os.Stdout
+	//if err != nil {
+	//return fmt.Errorf("error while creating session %s : %q\n", cmd, err)
+	//}
 	err := session.Run(cmd)
-	if err != nil {
-		log.Printf("error while running %s : %q", cmd, err)
-		return err
-	}
-	return nil
-
+	session.Close()
+	return err
 }
 
-func RunCmds(cmds []string, session *ssh.Session) error {
+func RunCmds(cmds []string, client *ssh.Client) error {
 
 	for _, cmd := range cmds {
-		err := RunCmd(cmd, session)
+		err := RunCmd(cmd, client)
 		if err != nil {
-			log.Fatalln(err)
 			return err
 		}
 	}
