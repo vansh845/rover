@@ -5,13 +5,12 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 )
 
-func InitConfig() {
+func intitializeViper() {
 
 	home, _ := os.UserHomeDir()
 	configHome := fmt.Sprintf("%s/.config/rover/", home)
@@ -98,26 +97,4 @@ func NewSSHSession() *ssh.Session {
 
 	return session
 
-}
-
-func RunCmd(cmd string, session *ssh.Session) error {
-	err := session.Run(cmd)
-	if err != nil {
-		log.Printf("error while running %s : %q", cmd, err)
-		return err
-	}
-	return nil
-
-}
-
-func RunCmds(cmds []string, session *ssh.Session) error {
-
-	for _, cmd := range cmds {
-		err := RunCmd(cmd, session)
-		if err != nil {
-			log.Fatalln(err)
-			return err
-		}
-	}
-	return nil
 }

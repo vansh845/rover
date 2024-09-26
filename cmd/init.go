@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/vansh845/rover/internal"
 )
 
@@ -16,24 +15,9 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("initializing rover🚀...")
 		//setup config
-		viper.SetConfigName("rover")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath("$HOME/.config/rover/")
-
-		var host, user, key string
-
-		fmt.Print("Enter host : ")
-		fmt.Scan(&host)
-		fmt.Print("Enter user : ")
-		fmt.Scan(&user)
-		fmt.Print("Enter key : ")
-		fmt.Scan(&key)
-		viper.Set("host", host)
-		viper.Set("user", user)
-		viper.Set("key", key)
+		internal.InitConfig()
 		session := internal.NewSSHSession()
 		session.Stdout = os.Stdout
-		session.Run("ls")
 
 	},
 }
