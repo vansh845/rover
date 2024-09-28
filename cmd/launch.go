@@ -31,7 +31,12 @@ var launchCmd = &cobra.Command{
 		var user string = viper.GetString("user")
 		var host string = viper.GetString("host")
 		var key string = viper.GetString("key")
-		img := "nginx"
+		var img string
+		var port string
+		fmt.Println("Enter name of docker image : ")
+		fmt.Scanln(&img)
+		fmt.Println("Enter default port exposed by docker image : ")
+		fmt.Scanln(&port)
 		command := exec.Command("sh", "-s", img, user, host, key)
 		command.Stdin = strings.NewReader(internal.LoadToVps)
 		command.Stdout = os.Stdout
@@ -43,7 +48,7 @@ var launchCmd = &cobra.Command{
 		client := internal.NewSSHClient()
 		cmds := []string{
 			fmt.Sprintf("docker load -i %s.tar", img),
-			fmt.Sprintf("docker run -p 80:80 %s", img),
+			fmt.Sprintf("docker run -p 80:%s %s", port, img),
 		}
 		err = internal.RunCmds(cmds, client)
 		if err != nil {
