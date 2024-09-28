@@ -45,5 +45,5 @@ go build .
 ### 👍That's it! An instance of your docker image will be up and running on your VPS.
 
 
-
+### Note : Rover is still under development.
 
