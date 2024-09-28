@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/vansh845/rover/internal"
 )
 
@@ -15,9 +16,12 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("initializing rover🚀...")
 		//setup config
-		internal.InitConfig()
+    err := internal.InitConfig()
+    if err != nil{
+      log.Fatalln("error occured while initializing config: ",err)
+    }
 		client := internal.NewSSHClient()
-
+    user := viper.GetString("user")
 		//install docker
 		dockerSteps := []string{
 			"sudo apt-get update -y",
@@ -32,8 +36,9 @@ var initCmd = &cobra.Command{
 			"sudo apt-get update -y",
 			"sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
 			"docker --version", // Use `docker --version` to verify Docker installation
+      fmt.Sprintf("sudo usermod -aG docker %s",user),
 		}
-		err := internal.RunCmds(dockerSteps, client)
+		err = internal.RunCmds(dockerSteps, client)
 		if err != nil {
 			log.Fatalln(err)
 		}

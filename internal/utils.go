@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func InitConfig() {
+func InitConfig() error {
 
 	home, _ := os.UserHomeDir()
 	configHome := fmt.Sprintf("%s/.config/rover/", home)
@@ -24,16 +24,15 @@ func InitConfig() {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(configHome, 0777)
 			if err != nil {
-				log.Fatalln(err)
+				return err
 			}
 			_, err = os.Create(configPath)
 			if err != nil {
-				log.Fatalln(err)
+				return err
 			}
 
-		} else {
-			log.Fatalln(err)
 		}
+		return err
 
 	}
 	viper.SetConfigName(configName)
@@ -50,13 +49,22 @@ func InitConfig() {
 	}
 	err = viper.WriteConfig()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 func setConfig() *ssh.ClientConfig {
+	home, _ := os.UserHomeDir()
+	path := filepath.Join(home, ".config/rover", "rover.yaml")
+	viper.SetConfigFile(path)
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalln(err)
+	}
 	key := viper.GetString("key")
 	user := viper.GetString("user")
+	fmt.Println(key, user)
 	fd, err := os.Open(key)
 	if err != nil {
 		log.Fatal(err)
@@ -99,6 +107,7 @@ func NewSSHClient() *ssh.Client {
 func RunCmd(cmd string, client *ssh.Client) error {
 	session, _ := client.NewSession()
 	session.Stdout = os.Stdout
+	session.Stderr = os.Stderr
 	//if err != nil {
 	//return fmt.Errorf("error while creating session %s : %q\n", cmd, err)
 	//}
